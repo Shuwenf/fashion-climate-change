@@ -1,0 +1,47 @@
+import json 
+import pandas as pd 
+
+Input = '{"H&M":{"description": "a fashion company","Co2 emissions(t)": 151753,\
+"workers conditions": 4,"materials":"0.7 polyester, 0.3 cotton"}}'
+
+database_json = '{"sample":{"description": "a fashion company","Co2 emissions(t)": 8,\
+"workers conditions": 4,"materials":"0.7 polyester, 0.3 cotton"},\
+"sample2":{"description": "another fashion company",\
+"Co2 emissions(t)": 6, "workers conditions": 4, "materials":"1.0 cotton"}}'
+
+#create database 
+df = pd.read_json(database_json, dtype = str)
+df = df.T
+
+#add new input
+new_input = pd.read_json(Input, dtype = str)
+input_company = str(new_input.columns[0])
+print(type(input_company))
+df = df.append(new_input.T, ignore_index = False)
+print(df)
+#sort by Co2 emissions and add rank
+df_sorted = df.sort_values(by = "Co2 emissions(t)", ascending = True)
+df_sorted.insert(0, "rank", range(1, 1+len(df)))
+
+
+# #co2 emissions for scope 1 and scope 2 
+
+#add tier
+def tier(row):
+    num = int(row["Co2 emissions(t)"])
+    if num <=3:
+        val = 1
+    elif num>3 and num<5:
+        val = 2
+    else:
+        val = 3
+    return val
+
+df_sorted["tier"] = df.apply(tier, axis=1)
+
+t = df_sorted.at[input_company, "tier"]
+r = df_sorted.at[input_company, "rank"]
+ret = {input_company:
+       {"tier": t, 
+       "rank": r}
+      }
