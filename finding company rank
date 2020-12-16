@@ -1,0 +1,67 @@
+#finding rank based only on carbon footprint given database companies and input company
+
+database = [
+{"company name": "sample",
+ "description": "a fashion company",
+ "overall carbon footprint": 3,
+ "worker's conditions": 4,
+ "materials used":[(0.7, "cotton"), (0.3, "polyester")]
+}, 
+
+{"company name": "sample2",
+ "description": "another fashion company",
+ "overall carbon footprint": 4, #higher is more emission
+ "worker's conditions": 3, #lower is worse condition 
+ "materials used":[(0.7, "cotton"), (0.3, "polyester")]
+}]
+
+Input = {"company name": "sample3",
+ "description": "another fashion company",
+ "overall carbon footprint": 2,
+ "worker's conditions": 3, 
+ "materials used":[(0.7, "cotton"), (0.3, "polyester")]}
+    
+
+#say only calculate based on carbon footprint:
+#find ranking for company "sample3"
+#rank 1 is best 
+
+class Company(object):
+    """
+    represents a company 
+    """
+    
+    def __init__(self, name, description, footprint, conditions, materials):
+        self.name = name
+        self.description = description
+        self.footprint = footprint
+        self.conditions = conditions
+        self.materials = materials
+        self.rank = 0
+    
+    def __gt__(self, other):
+        in1 = self.footprint
+        in2 = other.footprint
+        if in1>in2:
+            return True
+        else:
+            return False
+
+#creating database
+database_dict = {}
+for company in database:
+    name = company["company name"]
+    database_dict[name] = Company(name, company["description"], company["overall carbon footprint"], \
+                           company["worker's conditions"], company["materials used"])
+
+input_name = Input["company name"]
+database_dict[input_name] = Company(input_name, Input["description"], Input["overall carbon footprint"], \
+                        Input["worker's conditions"], Input["materials used"])
+
+#assigning rank 
+sorted_companies = sorted(database_dict.items(), key = lambda kv:(kv[1], kv[0]))
+for i, company in enumerate(sorted_companies):
+    company[1].rank = i+1
+
+
+print(database_dict[input_name].rank)
